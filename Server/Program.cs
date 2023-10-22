@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
+using RegistroTicketsDetalle.Server.DAL;
+
 
 namespace RegistroTicketsDetalle
 {
@@ -7,6 +10,10 @@ namespace RegistroTicketsDetalle
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            var ConStr = builder.Configuration.GetConnectionString("ConStr");
+
+            builder.Services.AddDbContext<TicketContexto>(options => options.UseSqlite(ConStr));
 
             // Add services to the container.
 
