@@ -1,0 +1,19 @@
+﻿@page "/Tickets"
+@page "/Tickets/{TicketId:int}"
+@inject HttpClient Httpcliente
+@using RegistroTicketsDetalle.Shared;
+
+<div class="card-header">
+	<h3>Registro de Tickets</h3>
+</div>
+
+
+
+
+@code {
+	[Parameter]
+
+	public int TicketId { get; set; }
+	public Tickets Ticket { get; set; } = new Tickets();
+
+}

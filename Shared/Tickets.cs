@@ -28,5 +28,6 @@ namespace RegistroTicketsDetalle.Shared
         [StringLength(1000, ErrorMessage = "El campo 'Descripción' no debe tener más de 1000 caracteres.")]
         public string Descripcion { get; set; }
 
-    }
+		public ICollection<TicketsDetalle> TicketsDetalles { get; set; } = new List<TicketsDetalle>();
+	}
 }
