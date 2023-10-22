@@ -11,9 +11,70 @@
 
 
 @code {
+
 	[Parameter]
 
 	public int TicketId { get; set; }
 	public Tickets Ticket { get; set; } = new Tickets();
 
+	protected override async Task OnInitializedAsync()
+	{
+		if(TicketId != 0)
+		{
+			this.Ticket.TicketsId = TicketId;
+			await Buscar();
+		}
+	}
+
+	public async Task Buscar()
+	{
+		var TicketEncontrado = await Httpcliente.GetFromJsonAsync<Tickets>($"api/Tickets/{TicketId}");
+		if(TicketEncontrado != null)
+		{
+			this.Ticket = TicketEncontrado;
+			StateHasChanged();
+		}
+		else
+		{
+			this.Ticket = new Tickets();
+		}
+	}
+
+	public async Task Guardar()
+	{
+		using var response = await Httpcliente.PostAsJsonAsync("api/Tickets", Ticket);
+		if(!response.IsSuccessStatusCode)
+		{
+			return;  
+		}
+		var ticketDevuelto = await response.Content.ReadFromJsonAsync<Tickets>();
+		if(ticketDevuelto != null)
+		{
+			this.Ticket = ticketDevuelto;
+			StateHasChanged();
+		}
+		else
+		{
+			return;
+		}
+
+	}
+
+	public void Nuevo()
+	{
+		this.Ticket = new Tickets();
+	}
+
+	public async Task Eliminar()
+	{
+		using var response = await Httpcliente.DeleteAsync($"api/Tickets/{TicketId}");
+		if(response.IsSuccessStatusCode)
+		{
+			Nuevo();
+		}
+		else
+		{
+			return;			
+		}
+	}
 }

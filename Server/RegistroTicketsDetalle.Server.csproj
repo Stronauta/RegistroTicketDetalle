@@ -23,5 +23,9 @@
     <ProjectReference Include="..\Shared\RegistroTicketsDetalle.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\" />
+  </ItemGroup>
+
 
 </Project>
