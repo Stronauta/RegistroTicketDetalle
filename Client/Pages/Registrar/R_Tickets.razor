@@ -10,7 +10,7 @@
 </div>
 
 <EditForm Model="Ticket" OnValidSubmit="Guardar">
-	<DataAnnotationsValidator />	
+	<DataAnnotationsValidator />
 
 	<div class="row mb-3">
 		<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
@@ -36,21 +36,21 @@
 	<div class="form-group mb-2">
 		<div class="input-group">
 			<span class="input-group-text">Solicitado Por:</span>
-			<InputText id="SolicitadoPor" class="form-control" placeholder="Nombre del solicitado" @bind-Value="Ticket.SolicitadoPor"></InputText>
+			<InputText id="SolicitadoPor" class="form-control" placeholder="Nombre del solicitado" @bind-Value="Ticket.SolicitadoPor" required ></InputText>
 		</div>
 	</div>
 
 	<div class="form-group mb-2">
 		<div class="input-group">
 			<span class="input-group-text">Asunto:</span>
-			<InputText id="Asunto" class="form-control" @bind-Value="Ticket.Asunto"></InputText>
+			<InputText id="Asunto" class="form-control" @bind-Value="Ticket.Asunto" required ></InputText>
 		</div>
 	</div>
 
 	<div class="form-group mb-2">
 		<div class="input-group">
 			<span class="input-group-text">Descripci&oacute;n:</span>
-			<InputTextArea id="Descripcion" class="form-control" @bind-Value="Ticket.Descripcion"></InputTextArea>
+			<InputTextArea id="Descripcion" class="form-control" @bind-Value="Ticket.Descripcion" required ></InputTextArea>
 		</div>
 	</div>
 
@@ -65,43 +65,43 @@
 	<div class="card-header mt-4">
 		<h3 class="card align-items-center">Detalle Ticket</h3>
 	</div>
-	 
+
 	@* Detalle Ticket *@
 	<div>
 		<label class="form-label"><span class="oi oi-person" /> Emisor</label>
-		<InputText @bind-Value="TicketsDetalle.Emisor" class="form-control" placeholder="Hola Prueba"></InputText>
+		<InputText @bind-Value="TicketsDetalle.Emisor" class="form-control" placeholder="Nombre Emisor"></InputText>
 		<ValidationMessage For="@(() => TicketsDetalle.Emisor)" />
 	</div>
 	<div>
 		<label class="form-label"><span class="oi oi-envelope-closed" /> Mensaje</label>
-		<InputTextArea @bind-Value="TicketsDetalle.Mensaje" class="form-control" placeholder="Hola Prueba"></InputTextArea>
+		<InputTextArea @bind-Value="TicketsDetalle.Mensaje" class="form-control" placeholder="Digite un Mensaje"></InputTextArea>
 		<ValidationMessage For="@(() => TicketsDetalle.Mensaje)" />
 	</div>
 	<div class="card-footer d-flex justify-content-center">
-		<button type="button" class="btn btn-outline-success" @* @onclick *@="">Agregar</button>
+		<button type="button" class="btn btn-outline-success" @onclick="AgregarDetalle">Agregar</button>
 	</div>
 
-	 <table class='table table-sm'>
-            <thead>
-                <tr>
-                    <th>TicketId</th>
-                    <th>Emisor</th>
-                    <th>Mensaje</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var detalle in Ticket.TicketsDetalles)
-                {
-                    <tr>
-                        <td>@Ticket.TicketsId</td>
-                        <td>@detalle.Emisor</td>
-                        <td>@detalle.Mensaje</td>
-                        <td><button type="button" class="btn btn-danger oi oi-trash" @* @onclick=@(() => RemoverDetalle(detalle)) *@></button></td>
-                    </tr>
-                }
-            </tbody>
-     </table>
+	<table class='table table-sm'>
+		<thead>
+			<tr>
+				<th>TicketId</th>
+				<th>Emisor</th>
+				<th>Mensaje</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var detalle in Ticket.TicketsDetalles)
+			{
+				<tr>
+					<td>@Ticket.TicketsId</td>
+					<td>@detalle.Emisor</td>
+					<td>@detalle.Mensaje</td>
+					<td><button type="button" class="btn btn-danger oi oi-trash" @onclick=@(() => RemoverDetalle(detalle))></button></td>
+				</tr>
+			}
+		</tbody>
+	</table>
 
 </EditForm>
 
@@ -111,13 +111,15 @@
 	[Parameter]
 
 	public int TicketId { get; set; }
-	public Tickets Ticket { get; set; } = new Tickets();
 
+	public Tickets Ticket { get; set; } = new Tickets();
+	public string Emisor { get; set; }
+	public string Mensaje { get; set; }
 	public TicketsDetalle TicketsDetalle { get; set; } = new TicketsDetalle();
 
 	protected override async Task OnInitializedAsync()
 	{
-		if(TicketId != 0)
+		if (TicketId > 0)
 		{
 			this.Ticket.TicketsId = TicketId;
 			await Buscar();
@@ -127,33 +129,44 @@
 	public async Task Buscar()
 	{
 		var TicketEncontrado = await Httpcliente.GetFromJsonAsync<Tickets>($"api/Tickets/{TicketId}");
-		if(TicketEncontrado != null)
+		if (TicketEncontrado != null)
 		{
 			this.Ticket = TicketEncontrado;
 			StateHasChanged();
 		}
 		else
 		{
-			this.Ticket = new Tickets();
+			var mensaje = new NotificationMessage
+				{
+					Severity = NotificationSeverity.Error,
+					Summary = "No se ha encontrado",
+					Detail = "No se ha encontrado el Ticket que estaba buscando",
+					Duration = 4_000
+				};
+			this.Nuevo();
 		}
 	}
 
 	public async Task Guardar()
 	{
 		using var response = await Httpcliente.PostAsJsonAsync("api/Tickets", Ticket);
-		if(!response.IsSuccessStatusCode)
-		{
-			return;  
-		}
-		var ticketDevuelto = await response.Content.ReadFromJsonAsync<Tickets>();
-		if(ticketDevuelto != null)
-		{
-			this.Ticket = ticketDevuelto;
-			StateHasChanged();
-		}
-		else
+		if (!response.IsSuccessStatusCode)
 		{
 			return;
+		}
+		var ticketDevuelto = await response.Content.ReadFromJsonAsync<Tickets>();
+		if (ticketDevuelto != null)
+		{
+			var mensaje = new NotificationMessage
+				{
+					Severity = NotificationSeverity.Success,
+					Summary = "Se ha guardado el ticket",
+					Detail = "Se ha creado su ticket",
+					Duration = 4_000
+				};
+			notificationService.Notify(mensaje);
+			this.Ticket = ticketDevuelto;
+			StateHasChanged();
 		}
 
 	}
@@ -161,26 +174,102 @@
 	public void Nuevo()
 	{
 		this.Ticket = new Tickets();
+		var mensaje = new NotificationMessage
+			{
+				Severity = NotificationSeverity.Success,
+				Summary = "Nuevo ",
+				Detail = "Puedes escribir un nuevo Ticket",
+				Duration = 5_000
+			};
+		notificationService.Notify(mensaje);
 	}
 
 	public async Task Eliminar()
 	{
 		using var response = await Httpcliente.DeleteAsync($"api/Tickets/{TicketId}");
-		if(response.IsSuccessStatusCode)
+		if (response.IsSuccessStatusCode)
 		{
 			Nuevo();
 		}
 		else
 		{
-			return;			
+			return;
 		}
 	}
 
-	// public void RemoverDetalle(TicketsDetalle detalleRemover)
-	// {
-	// 	Emisor = detalleRemover.Emisor;
-	// 	Mensaje = detalleRemover.Mensaje;
+	public async Task AgregarDetalle()
+	{
+		if (Ticket != null && ValidarDetalle())
+		{
+			var detalle = new TicketsDetalle
+				{
+					TicketId = Ticket.TicketsId,
+					Emisor = Emisor,
+					Mensaje = Mensaje
+				};
+			Ticket.TicketsDetalles.Add(detalle);
+			Emisor = string.Empty;
+			Mensaje = string.Empty;
+			StateHasChanged();
+			var mensaje = new NotificationMessage
+				{
+					Severity = NotificationSeverity.Success,
+					Summary = "Detalle agregado",
+					Duration = 3_000
+				};
+			notificationService.Notify(mensaje);
+		}
+	}
 
-	// 	Ticket.TicketsDetalles.Remove(detalleRemover);
-	// }
+
+	public void RemoverDetalle(TicketsDetalle detalleRemover)
+	{
+		Emisor = detalleRemover.Emisor;
+		Mensaje = detalleRemover.Mensaje;
+
+		Ticket.TicketsDetalles.Remove(detalleRemover);
+	}
+
+	public bool ValidarDetalle()
+	{
+		bool EsValido = true;
+
+		if (!ValidarEmisor())
+		{
+			EsValido = false;
+		}
+
+		if (String.IsNullOrWhiteSpace(Mensaje))
+		{
+			var mensaje = new NotificationMessage
+				{
+					Severity = NotificationSeverity.Error,
+					Summary = "Error en Detalle",
+					Detail = "El Mensaje no puede estar vacío",
+					Duration = 3_000
+				};
+			notificationService.Notify(mensaje);
+			EsValido = false;
+		}
+
+		return EsValido;
+	}
+
+	public bool ValidarEmisor()
+	{
+		if (String.IsNullOrWhiteSpace(Emisor))
+		{
+			var mensaje = new NotificationMessage
+				{
+					Severity = NotificationSeverity.Error,
+					Summary = "Error en Detalle",
+					Detail = "El Emisor no puede estar vacío",
+					Duration = 3_000
+				};
+			notificationService.Notify(mensaje);
+			return false;
+		}
+		return true;
+	}
+
 }

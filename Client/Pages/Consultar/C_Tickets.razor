@@ -6,9 +6,58 @@
 	<h3 class="card align-items-center">Consulta de Tickets</h3>
 </div>
 
+
+
+ <div class="card-body">
+        <div class="row">
+            <button type="button" @onclick="Buscar" class="btn btn-primary input-group-text">
+                <i class="oi oi-magnifying-glass " />
+            </button>
+        </div>
+        @if (Tickets is not null)
+        {
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>TicketId</th>
+                        <th>Fecha</th>
+                        <th>Solicitado Por</th>
+                        <th>Asunto</th>
+                        <th>Descripci&oacute;n</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Tickets)
+                    {
+                        <tr>
+                            <td>@ticket.TicketsId</td>
+                            <td>@ticket.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@ticket.SolicitadoPor</td>
+                            <td>@ticket.Asunto</td>
+                            <td>@ticket.Descripcion</td>
+                        <td><a href="RegistroTickets/@ticket.TicketsId">Ver</a></td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+        }
+</div>
+
 @code {
 
     public List<Tickets>? Tickets { get; set; }
+
+    public DateTime Desde { get; set; }
+    public DateTime Hasta { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Desde = DateTime.Now.AddMonths(-1);
+        Hasta = DateTime.Now;
+    }
 
     public async Task Buscar()
     {
