@@ -1,13 +1,109 @@
-﻿@page "/Tickets"
-@page "/Tickets/{TicketId:int}"
+﻿@page "/RegistroTickets"
+@page "/RegistroTickets/{TicketId:int}"
 @inject HttpClient Httpcliente
 @using RegistroTicketsDetalle.Shared;
+@inject NotificationService notificationService
+
 
 <div class="card-header">
-	<h3>Registro de Tickets</h3>
+	<h3 class="card align-items-center">Registro de Tickets</h3>
 </div>
 
+<EditForm Model="Ticket" OnValidSubmit="Guardar">
+	<DataAnnotationsValidator />	
 
+	<div class="row mb-3">
+		<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4">
+			<div class="d-flex align-items-center">
+				<span class="input-group-text">ID</span>
+				<InputNumber id="TicketsId" min="0" class="form-control" @bind-Value="Ticket.TicketsId" />
+				<button class="btn btn-primary ml-2" type="button" @onclick="Buscar">
+					<i class="oi oi-magnifying-glass" />
+				</button>
+			</div>
+		</div>
+
+		<div class="col-md-6">
+			<div Class="form-group mb-2">
+				<div class="input-group">
+					<span class="input-group-text">Fecha:</span>
+					<InputDate id="Fecha" class="form-control" @bind-Value="Ticket.Fecha" />
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="form-group mb-2">
+		<div class="input-group">
+			<span class="input-group-text">Solicitado Por:</span>
+			<InputText id="SolicitadoPor" class="form-control" placeholder="Nombre del solicitado" @bind-Value="Ticket.SolicitadoPor"></InputText>
+		</div>
+	</div>
+
+	<div class="form-group mb-2">
+		<div class="input-group">
+			<span class="input-group-text">Asunto:</span>
+			<InputText id="Asunto" class="form-control" @bind-Value="Ticket.Asunto"></InputText>
+		</div>
+	</div>
+
+	<div class="form-group mb-2">
+		<div class="input-group">
+			<span class="input-group-text">Descripci&oacute;n:</span>
+			<InputTextArea id="Descripcion" class="form-control" @bind-Value="Ticket.Descripcion"></InputTextArea>
+		</div>
+	</div>
+
+	<div class="card-footer d-flex justify-content-center mb-4">
+		<div class="btn-group">
+			<button type="button" class="btn btn-outline-primary" @onclick="Nuevo">Nuevo <i class="oi oi-file" /></button>
+			<button type="submit" class="btn btn-outline-success" @onclick="Guardar">Guardar <i class="oi oi-document" /></button>
+			<button type="button" class="btn btn-outline-danger" @onclick="Eliminar">Eliminar <i class="oi oi-trash" /></button>
+		</div>
+	</div>
+
+	<div class="card-header mt-4">
+		<h3 class="card align-items-center">Detalle Ticket</h3>
+	</div>
+	 
+	@* Detalle Ticket *@
+	<div>
+		<label class="form-label"><span class="oi oi-person" /> Emisor</label>
+		<InputText @bind-Value="TicketsDetalle.Emisor" class="form-control" placeholder="Hola Prueba"></InputText>
+		<ValidationMessage For="@(() => TicketsDetalle.Emisor)" />
+	</div>
+	<div>
+		<label class="form-label"><span class="oi oi-envelope-closed" /> Mensaje</label>
+		<InputTextArea @bind-Value="TicketsDetalle.Mensaje" class="form-control" placeholder="Hola Prueba"></InputTextArea>
+		<ValidationMessage For="@(() => TicketsDetalle.Mensaje)" />
+	</div>
+	<div class="card-footer d-flex justify-content-center">
+		<button type="button" class="btn btn-outline-success" @* @onclick *@="">Agregar</button>
+	</div>
+
+	 <table class='table table-sm'>
+            <thead>
+                <tr>
+                    <th>TicketId</th>
+                    <th>Emisor</th>
+                    <th>Mensaje</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detalle in Ticket.TicketsDetalles)
+                {
+                    <tr>
+                        <td>@Ticket.TicketsId</td>
+                        <td>@detalle.Emisor</td>
+                        <td>@detalle.Mensaje</td>
+                        <td><button type="button" class="btn btn-danger oi oi-trash" @* @onclick=@(() => RemoverDetalle(detalle)) *@></button></td>
+                    </tr>
+                }
+            </tbody>
+     </table>
+
+</EditForm>
 
 
 @code {
@@ -16,6 +112,8 @@
 
 	public int TicketId { get; set; }
 	public Tickets Ticket { get; set; } = new Tickets();
+
+	public TicketsDetalle TicketsDetalle { get; set; } = new TicketsDetalle();
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -77,4 +175,12 @@
 			return;			
 		}
 	}
+
+	// public void RemoverDetalle(TicketsDetalle detalleRemover)
+	// {
+	// 	Emisor = detalleRemover.Emisor;
+	// 	Mensaje = detalleRemover.Mensaje;
+
+	// 	Ticket.TicketsDetalles.Remove(detalleRemover);
+	// }
 }

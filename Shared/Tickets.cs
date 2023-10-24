@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,9 +13,9 @@ namespace RegistroTicketsDetalle.Shared
         [Key]
         public int TicketsId { get; set; }
 
-        [Required]
-        [DataType(DataType.Date)]
-        public DateTime Fecha { get; set; } = DateTime.Now;
+		[Required]
+		[DataType(DataType.Date)]
+		public DateTime Fecha { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "El campo 'Solicitado por' es requerido.")]
         [StringLength(100, ErrorMessage = "El campo 'Solicitado por' no debe tener más de 100 caracteres.")]
@@ -27,7 +28,7 @@ namespace RegistroTicketsDetalle.Shared
         [Required(ErrorMessage = "El campo 'Descripción' es requerido.")]
         [StringLength(1000, ErrorMessage = "El campo 'Descripción' no debe tener más de 1000 caracteres.")]
         public string Descripcion { get; set; }
-
-		public ICollection<TicketsDetalle> TicketsDetalles { get; set; } = new List<TicketsDetalle>();
+        [ForeignKey("TicketId")]
+        public ICollection<TicketsDetalle> TicketsDetalles { get; set; } = new List<TicketsDetalle>();
 	}
 }

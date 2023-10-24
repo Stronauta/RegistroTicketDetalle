@@ -1,5 +1,19 @@
-﻿<h3>C_Tickets</h3>
+﻿@page "/ConsultaTickets"
+@inject HttpClient httpClient
+@using RegistroTicketsDetalle.Shared;
+
+<div class="card-header">
+	<h3 class="card align-items-center">Consulta de Tickets</h3>
+</div>
 
 @code {
 
+    public List<Tickets>? Tickets { get; set; }
+
+    public async Task Buscar()
+    {
+        Tickets = await httpClient.GetFromJsonAsync<List<Tickets>>($"api/Tickets");
+        StateHasChanged();
+
+    }
 }
