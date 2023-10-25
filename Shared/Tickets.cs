@@ -27,7 +27,7 @@ namespace RegistroTicketsDetalle.Shared
 
         [Required(ErrorMessage = "El campo 'Descripción' es requerido.")]
         [StringLength(1000, ErrorMessage = "El campo 'Descripción' no debe tener más de 1000 caracteres.")]
-        public string Descripcion { get; set; }
+        public string Descripción { get; set; }
         [ForeignKey("TicketId")]
         public ICollection<TicketsDetalle> TicketsDetalles { get; set; } = new List<TicketsDetalle>();
 	}
